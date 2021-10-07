@@ -9,7 +9,8 @@ CREATE TABLE Items(ItemID INTEGER PRIMARY KEY,
 				   Started TIMESTAMP,
 				   Ends TIMESTAMP,
 				   SellerID CHAR(300),
-				   Description TEXT);
+				   Description TEXT,
+				   FOREIGN KEY (SellerID) REFERENCES Users(UserID));
 
 CREATE TABLE ItemBids(ItemID INTEGER PRIMARY KEY,
 					  Currently DECIMAL,
