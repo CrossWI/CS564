@@ -1,5 +1,4 @@
 .separator |
-
 .import Items.dat Items
 update Items set ItemID = null where ItemID = 'NULL';
 update Items set Name = null where Name = 'NULL';
@@ -8,24 +7,28 @@ update Items set Ends = null where Ends = 'NULL';
 update Items set SellerID = null where SellerID = 'NULL';
 update Items set Description = null where Description = 'NULL';
 
+.separator |
 .import ItemBids.dat ItemBids
 update ItemBids set ItemID = null where ItemID = 'NULL';
 update ItemBids set Currently = null where Currently = 'NULL';
 update ItemBids set First_Bid = null where First_Bid = 'NULL';
 update ItemBids set Number_of_Bids = null where Number_of_Bids = 'NULL';
 
+.separator |
 .import Bids.dat Bids
 update Bids set ItemID = null where ItemID = 'NULL';
 update Bids set UserID = null where UserID = 'NULL';
 update Bids set Time = null where Time = 'NULL';
 update Bids set Amount = null where Amount = 'NULL';
 
+.separator |
 .import Users.dat Users
 update Users set UserID = null where UserID = 'NULL';
 update Users set Location = null where Location = 'NULL';
 update Users set Country = null where Country = 'NULL';
 update Users set Rating = null where Rating = 'NULL';
 
+.separator |
 .import Category.dat Category
 update Category set ItemID = null where ItemID = 'NULL';
 update Category set Category = null where Category = 'NULL';
