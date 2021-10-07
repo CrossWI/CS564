@@ -31,4 +31,4 @@ CREATE TABLE Users(UserID CHAR(300),
 
 CREATE TABLE Category(ItemID INTEGER,
 					  Category CHAR(300),
-					  FOREIGN KEY (ItemID) REFERENCES Items(ItemID))
+					  FOREIGN KEY (ItemID) REFERENCES Items(ItemID));

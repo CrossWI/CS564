@@ -29,8 +29,6 @@ from json import loads
 from re import sub
 
 columnSeparator = "|"
-NULL_CONST = 'NULL'
-NULL_CONST_SEP = '|' + 'NULL'
 
 # Dictionary of months used for date transformation
 MONTHS = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06',\
@@ -85,247 +83,183 @@ def parseJson(json_file):
 			the SQL tables based on your relation design
 			"""
 			# get item data:
-
 			ItemID = item['ItemID']
 			Name = item['Name']
 			Started = item['Started']
-			Ends = item['ends']
-			SellerID = item['Seller']['UserID']
-			Description = item['description']
+			Ends = item['Ends']
+			Seller = item['Seller']
+			SellerID = ''
 
-			item_data = fillItems(ItemID, Name, Started, Ends, SellerID, Description)
-			# if (ItemID != None):
-			# 	item_data += ItemID
-			# else: 
-			# 	item_data += NULL_CONST
-			# if (Name != None):
-			# 	item_data += '|' + Name
-			# else:
-			# 	item_data += NULL_CONST_SEP
-			# if (Started != None):
-			# 	item_data += '|' + Started
-			# else:
-			# 	item_data += NULL_CONST_SEP
-			# if (Ends != None):
-			# 	item_data += '|' + Ends
-			# else:
-			# 	item_data += NULL_CONST_SEP
-			# if (SellerID != None):
-			# 	item_data += '|' + SellerID
-			# else:
-			# 	item_data += NULL_CONST_SEP
-			# if (Description != None):
-			# 	item_data += '|' + Description
-			# else:
-			# 	item_data += NULL_CONST_SEP
+			if (Seller != None):
+				SellerID = Seller['UserID']
+			else:
+				SellerID = None
+			
+			Description = item['Description']
 
-			f_item = open("Items.dat", "a")
-			f_item.write(item_data)
-			f_item.close()
+			item_data = ''
+			if (ItemID != None):
+				item_data += ItemID
+			else: 
+				item_data += 'NULL'
+			if (Name != None):
+				item_data += '|' + Name
+			else:
+				item_data += '|NULL'
+			if (Started != None):
+				item_data += '|' + Started
+			else:
+				item_data += '|NULL'
+			if (Ends != None):
+				item_data += '|' + Ends
+			else:
+				item_data += '|NULL'
+			if (SellerID != None):
+				item_data += '|' + SellerID
+			else:
+				item_data += '|NULL'
+			if (Description != None):
+				item_data += '|' + Description
+			else:
+				item_data += '|NULL'
+
+			f = open("Items.dat", "a")
+			f.write(item_data)
+			f.close()
 
 			# get item_bids data:
 			Currently = item['Currently']
 			First_Bid = item['First_Bid']
 			Number_of_Bids = item['Number_of_Bids']
 
-			item_bids_data = fillItemBids(ItemID, Currently, First_Bid, Number_of_Bids)
-			# if (ItemID != None):
-			# 	item_bids_data += ItemID
-			# else: 
-			# 	item_bids_data += NULL_CONST
-			# if (Currently != None):
-			# 	item_bids_data += '|' + Currently
-			# else: 
-			# 	item_bids_data += NULL_CONST_SEP
-			# if (First_Bid != None):
-			# 	item_bids_data += '|' + First_Bid
-			# else:
-			# 	item_bids_data += NULL_CONST_SEP
-			# if (Number_of_Bids != None):
-			# 	item_bids_data += '|' + Number_of_Bids
-			# else:
-			# 	item_bids_data += NULL_CONST_SEP
+			item_bids_data = ''
+			if (ItemID != None):
+				item_bids_data += ItemID
+			else: 
+				item_bids_data += 'NULL'
+			if (Currently != None):
+				item_bids_data += '|' + Currently
+			else: 
+				item_bids_data += '|NULL'
+			if (First_Bid != None):
+				item_bids_data += '|' + First_Bid
+			else:
+				item_bids_data += '|NULL'
+			if (Number_of_Bids != None):
+				item_bids_data += '|' + Number_of_Bids
+			else:
+				item_bids_data += '|NULL'
 			
-			f_item_bids = open("ItemBids.dat", "a")
-			f_item_bids.write(item_bids_data)
-			f_item_bids.close()
+			f = open("ItemBids.dat", "a")
+			f.write(item_bids_data)
+			f.close()
 
 			# get bid data:
-			UserID = item['Bids']['Bidder']['UserID']
-			Time = item['Bids']['Time']
-			Amount = item['Bids']['Amount']
+			Bids = item['Bids']
+			UserID = None
+			Time = None
+			Amount = None
 
-			bids_data = fillBidsData(ItemID, UserID, Time, Amount)
-			# if (ItemID != None):
-			# 	bids_data += ItemID
-			# else: 
-			# 	bids_data += NULL_CONST
-			# if (UserID != None):
-			# 	bids_data += '|' + UserID
-			# else: 
-			# 	bids_data += NULL_CONST_SEP
-			# if (Time != None):
-			# 	bids_data += '|' + Time
-			# else:
-			# 	bids_data += NULL_CONST_SEP
-			# if (Amount != None):
-			# 	bids_data += '|' + Amount
-			# else:
-			# 	bids_data += NULL_CONST_SEP
+			if (Bids != None):
+				for i in range(len(Bids)):
+					Bidder = Bids[i]['Bid']['Bidder']
+					if (Bidder != None):
+						UserID = Bidder['UserID']
+					else:
+						UserID = 'NULL'
+
+					Bid = Bids[i]["Bid"]
+					Time = Bid['Time']
+					Amount = Bid['Amount']
+
+					bids_data = ''
+					if (ItemID != None):
+						bids_data += ItemID
+					else: 
+						bids_data += 'NULL'
+					if (UserID != None):
+						bids_data += '|' + UserID
+					else: 
+						bids_data += '|NULL'
+					if (Time != None):
+						bids_data += '|' + transformDttm(Time)
+					else:
+						bids_data += '|NULL'
+					if (Amount != None):
+						bids_data += '|' + transformDollar(Amount)
+					else:
+						bids_data += '|NULL'
 			
-			f_bids = open("Bids.dat", "a")
-			f_bids.write(bids_data)
-			f_bids.close()
+					f = open("Bids.dat", "a")
+					f.write(bids_data)
+					f.close()
 
 			# get user data:
-			Location = item['Bids']['Bidder']['Location']
-			Country = item['Bids']['Bidder']['Country']
-			Rating = item['Bids']['Bidder']['Rating']
+			Bids = item['Bids']
+			Location = ''
+			Country = ''
+			Rating = ''
 
-			user_data = fillUserData(UserID, Location, Country, Rating)
-			# if (UserID != None):
-			# 	user_data += UserID
-			# else: 
-			# 	user_data += NULL_CONST
-			# if (Location != None):
-			# 	user_data += '|' + Location
-			# else:
-			# 	user_data += NULL_CONST_SEP
-			# if (Country != None):
-			# 	user_data += '|' + Country
-			# else:
-			# 	user_data += NULL_CONST_SEP
-			# if (Rating != None):
-			# 	user_data += '|' + Rating
-			# else:
-			# 	user_data += NULL_CONST_SEP
-			
-			f_users = open("Users.dat", "a")
-			f_users.write(user_data)
-			f_users.close()
+			if (Bids != None):
+				for i in range(len(Bids)):
+					Bidder = Bids[i]['Bid']['Bidder']
+					if (Bidder != None):
+						if 'Location' in Bidder.keys():
+							Location = Bidder['Location']
+						else:
+							Location = 'NULL'
+						if 'Country' in Bidder.keys():
+							Country = Bidder['Country']
+						else:
+							Country = 'NULL'
+						if 'Rating' in Bidder.keys():
+							Rating = Bidder['Rating']
+						else:
+							Rating = 'NULL'
+					else:
+						Location = 'NULL'
+						Country = 'NULL'
+						Rating = 'NULL'
+
+					user_data = ''
+					if (UserID != None):
+						user_data += UserID
+					else: 
+						user_data += 'NULL'
+					if (Location != None):
+						user_data += '|' + Location
+					else:
+						user_data += '|NULL'
+					if (Country != None):
+						user_data += '|' + Country
+					else:
+						user_data += '|NULL'
+					if (Rating != None):
+						user_data += '|' + Rating + '\n'
+					else:
+						user_data += '|NULL\n'
+
+					f = open("Users.dat", "a")
+					f.write(user_data)
+					f.close()
 
 			# get category data
 			Category = item['Category']
 
-			category_data = fillCategoryData(ItemID, Category)
-			# if (ItemID != None):
-			# 	category_data += ItemID
-			# else: 
-			# 	category_data += NULL_CONST
-			# if (Category != None):
-			# 	category_data += Category
-			# else: 
-			# 	category_data += NULL_CONST_SEP
+			category_data = ''
+			if (ItemID != None):
+				category_data += ItemID
+			else: 
+				category_data += 'NULL'
+			if (Category != None):
+				category_data += ' '.join(Category)
+			else: 
+				category_data += '|NULL'
 
-			f_category = open("Category.dat", "a")
-			f_category.write(category_data)
-			f_category.close()
+			f = open("Category.dat", "a")
+			f.write(category_data)
+			f.close()
 
-
-def fillItems(ItemID, Name, Started, Ends, SellerID, Description):
-	items_data = ''
-
-	if (ItemID != None):
-		item_data += ItemID
-	else: 
-		item_data += NULL_CONST
-	if (Name != None):
-		item_data += '|' + Name
-	else:
-		item_data += NULL_CONST_SEP
-	if (Started != None):
-		item_data += '|' + Started
-	else:
-		item_data += NULL_CONST_SEP
-	if (Ends != None):
-		item_data += '|' + Ends
-	else:
-		item_data += NULL_CONST_SEP
-	if (SellerID != None):
-		item_data += '|' + SellerID
-	else:
-		item_data += NULL_CONST_SEP
-	if (Description != None):
-		item_data += '|' + Description
-	else:
-		item_data += NULL_CONST_SEP
-
-	return items_data
-
-def fillItemBids(ItemID, Currently, First_Bid, Number_of_Bids):
-	item_bids_data = ''
-	if (ItemID != None):
-		item_bids_data += ItemID
-	else: 
-		item_bids_data += NULL_CONST
-	if (Currently != None):
-		item_bids_data += '|' + Currently
-	else: 
-		item_bids_data += NULL_CONST_SEP
-	if (First_Bid != None):
-		item_bids_data += '|' + First_Bid
-	else:
-		item_bids_data += NULL_CONST_SEP
-	if (Number_of_Bids != None):
-		item_bids_data += '|' + Number_of_Bids
-	else:
-		item_bids_data += NULL_CONST_SEP
-	return item_bids_data
-
-def fillBidsData(ItemID, UserID, Time, Amount):
-	bids_data = ''
-
-	if (ItemID != None):
-		bids_data += ItemID
-	else: 
-		bids_data += NULL_CONST
-	if (UserID != None):
-		bids_data += '|' + UserID
-	else: 
-		bids_data += NULL_CONST_SEP
-	if (Time != None):
-		bids_data += '|' + Time
-	else:
-		bids_data += NULL_CONST_SEP
-	if (Amount != None):
-		bids_data += '|' + Amount
-	else:
-		bids_data += NULL_CONST_SEP
-
-	return bids_data
-
-def fillUserData(UserID, Location, Country, Rating):
-	user_data = ''
-	if (UserID != None):
-		user_data += UserID
-	else: 
-		user_data += NULL_CONST
-	if (Location != None):
-		user_data += '|' + Location
-	else:
-		user_data += NULL_CONST_SEP
-	if (Country != None):
-		user_data += '|' + Country
-	else:
-		user_data += NULL_CONST_SEP
-	if (Rating != None):
-		user_data += '|' + Rating
-	else:
-		user_data += NULL_CONST_SEP
-	return user_data
-
-def fillCategoryData(ItemID, Category):
-	category_data = ''
-	if (ItemID != None):
-		category_data += ItemID
-	else: 
-		category_data += NULL_CONST
-	if (Category != None):
-		category_data += Category
-	else: 
-		category_data += NULL_CONST_SEP
-
-	return category_data
 
 """
 Loops through each json files provided on the command line and passes each file

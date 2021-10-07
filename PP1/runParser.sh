@@ -1,9 +1,1 @@
-files="$(ls ebay_data)"
-args=""
-
-for file in $files
-do
-    args="${args} ebay_data/${file}"
-done
-
-python skeleton_parser.py $args
+python PP1_parser.py ebay_data/items-*.json
