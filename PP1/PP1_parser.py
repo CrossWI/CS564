@@ -75,6 +75,11 @@ of the necessary SQL tables for your database.
 """
 def parseJson(json_file):
 	with open(json_file, 'r') as f:
+		i_file = open("Items.dat", "a")
+		ib_file = open("ItemBids.dat", "a")
+		b_file = open("Bids.dat", "a")
+		u_file = open("Users.dat", "a")
+		c_file = open("Category.dat", "a")
 		items = loads(f.read())['Items'] # creates a Python dictionary of Items for the supplied json file
 		for item in items:
 			"""
@@ -119,13 +124,11 @@ def parseJson(json_file):
 			else:
 				item_data += '|NULL'
 			if (Description != None):
-				item_data += '|' + Description
+				item_data += '|' + Description + '\n'
 			else:
-				item_data += '|NULL'
+				item_data += '|NULL\n'
 
-			f = open("Items.dat", "a")
-			f.write(item_data)
-			f.close()
+			i_file.write(item_data)
 
 			# get item_bids data:
 			Currently = item['Currently']
@@ -146,13 +149,11 @@ def parseJson(json_file):
 			else:
 				item_bids_data += '|NULL'
 			if (Number_of_Bids != None):
-				item_bids_data += '|' + Number_of_Bids
+				item_bids_data += '|' + Number_of_Bids + '\n'
 			else:
-				item_bids_data += '|NULL'
+				item_bids_data += '|NULL\n'
 			
-			f = open("ItemBids.dat", "a")
-			f.write(item_bids_data)
-			f.close()
+			ib_file.write(item_bids_data)
 
 			# get bid data:
 			Bids = item['Bids']
@@ -186,13 +187,11 @@ def parseJson(json_file):
 					else:
 						bids_data += '|NULL'
 					if (Amount != None):
-						bids_data += '|' + transformDollar(Amount)
+						bids_data += '|' + transformDollar(Amount) + '\n'
 					else:
-						bids_data += '|NULL'
-			
-					f = open("Bids.dat", "a")
-					f.write(bids_data)
-					f.close()
+						bids_data += '|NULL\n'
+
+					b_file.write(bids_data)
 
 			# get user data:
 			Bids = item['Bids']
@@ -239,9 +238,7 @@ def parseJson(json_file):
 					else:
 						user_data += '|NULL\n'
 
-					f = open("Users.dat", "a")
-					f.write(user_data)
-					f.close()
+					u_file.write(user_data)
 
 			# get category data
 			Category = item['Category']
@@ -252,14 +249,17 @@ def parseJson(json_file):
 			else: 
 				category_data += 'NULL'
 			if (Category != None):
-				category_data += ' '.join(Category)
+				category_data += '|' + ' '.join(Category) + '\n'
 			else: 
-				category_data += '|NULL'
-
-			f = open("Category.dat", "a")
-			f.write(category_data)
-			f.close()
-
+				category_data += '|NULL\n'
+			
+			c_file.write(category_data)
+			
+		i_file.close()
+		ib_file.close()
+		b_file.close()
+		u_file.close()
+		c_file.close()
 
 """
 Loops through each json files provided on the command line and passes each file
