@@ -105,10 +105,10 @@ def parseJson(json_file):
 			item_data = ''
 			if (ItemID != None):
 				item_data += ItemID
-			else: 
+			else:
 				item_data += 'NULL'
 			if (Name != None):
-				item_data += '|' + Name
+				item_data += '|' + '\"' + sub(r'\"','\"\"', Name) + '\"'
 			else:
 				item_data += '|NULL'
 			if (Started != None):
@@ -124,7 +124,7 @@ def parseJson(json_file):
 			else:
 				item_data += '|NULL'
 			if (Description != None):
-				item_data += '|' + Description + '\n'
+				item_data += '|' + '\"' + sub(r'\"','\"\"', Description) + '\"' + '\n'
 			else:
 				item_data += '|NULL\n'
 
@@ -222,15 +222,15 @@ def parseJson(json_file):
 
 					user_data = ''
 					if (UserID != None):
-						user_data += UserID
+						user_data += '\"' + sub(r'\"','\"\"', UserID) + '\"'
 					else: 
 						user_data += 'NULL'
-					if (Location != None):
-						user_data += '|' + Location
+					if (Location != None and 'Location' in Bidder.keys()):
+						user_data += '|' + '\"' + sub(r'\"','\"\"', Location) + '\"'
 					else:
 						user_data += '|NULL'
-					if (Country != None):
-						user_data += '|' + Country
+					if (Country != None and 'Location' in Bidder.keys()):
+						user_data += '|' + '\"' + sub(r'\"','\"\"', Country) + '\"'
 					else:
 						user_data += '|NULL'
 					if (Rating != None):
@@ -241,19 +241,20 @@ def parseJson(json_file):
 					u_file.write(user_data)
 
 			# get category data
-			Category = item['Category']
-
-			category_data = ''
-			if (ItemID != None):
-				category_data += ItemID
-			else: 
-				category_data += 'NULL'
-			if (Category != None):
-				category_data += '|' + ' '.join(Category) + '\n'
-			else: 
-				category_data += '|NULL\n'
+			Categories = item['Category']
+			for Category in Categories:
+				category_data = ''
+				if (ItemID != None):
+					category_data += ItemID
+				else: 
+					category_data += 'NULL'
+				if (Category != None):
+					category_data += '|' + '\"' + sub(r'\"','\"\"',Category) + '\"' + '\n'
+				else: 
+					category_data += '|NULL\n'
 			
-			c_file.write(category_data)
+				c_file.write(category_data)
+
 			
 		i_file.close()
 		ib_file.close()
