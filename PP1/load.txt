@@ -2,5 +2,5 @@
 .import Items.dat Items
 .import Users.dat Users
 .import Bids.dat Bids
-.import Category_Infos.dat CategoryInfos
-.import Categories.dat Category
+.import ItemCategories.dat ItemCategories
+.import Categories.dat Categories
