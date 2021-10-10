@@ -78,14 +78,14 @@ of the necessary SQL tables for your database.
 items_tab = {}
 users = {}
 bids = defaultdict(list)
-category_infos = defaultdict(list)
+item_categories = defaultdict(list)
 categories = {}
 categoryID = 0
 def parseJson(json_file):
 	global items_tab
 	global users
 	global bids
-	global category_infos
+	global item_categories
 	global categories
 	global categoryID
 	with open(json_file, 'r') as f:
@@ -169,8 +169,8 @@ def parseJson(json_file):
 					categories[category] = str(categoryID)
 
 				category_info = categories[category]
-				if (category_info not in category_infos[ItemID]):
-					category_infos[ItemID].append(category_info)
+				if (category_info not in item_categories[ItemID]):
+					item_categories[ItemID].append(category_info)
 	
 def writeToFiles():
 	replace_quote = lambda string: '"' + string.replace("'", "''").replace('"', '""') + '"'
@@ -187,9 +187,9 @@ def writeToFiles():
 		for itemID, itemBid in bids.items()
 		for bid in itemBid)
 
-	with open("Category_Infos.dat", "w") as f4:
+	with open("ItemCategories.dat", "w") as f4:
 		f4.writelines("\n".join(itemID + '|' + categorID for categorID in categoryIDs) + "\n"
-		for itemID, categoryIDs in category_infos.items())
+		for itemID, categoryIDs in item_categories.items())
 	with open("Categories.dat", "w") as f5:
 		f5.writelines(replace_quote(name) + '|' + categoryID + "\n"
 		for name, categoryID in categories.items())

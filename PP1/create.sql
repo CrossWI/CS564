@@ -31,7 +31,7 @@ CREATE TABLE Bids(ItemID int,
 				  FOREIGN KEY (BidderID) REFERENCES Users(UserID),
 				  PRIMARY KEY (ItemID, Time));
 
-CREATE TABLE CategoryInfos(ItemID int,
+CREATE TABLE ItemCategories(ItemID int,
 					  CategoryID int,
 					  FOREIGN KEY (ItemID) REFERENCES Items(ItemID),
 					  FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID),
