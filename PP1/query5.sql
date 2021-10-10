@@ -1,3 +1,3 @@
 SELECT COUNT(*)
-FROM ITEMS
-WHERE SellerID IN (SELECT UserID FROM Users)
+FROM Users
+WHERE isSeller = 1 AND Rating > 1000;

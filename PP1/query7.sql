@@ -1,5 +1,5 @@
-SELECT count(DISTINCT Category)
-FROM Category
+SELECT COUNT(ItemID)
+FROM Items
 WHERE ItemID EXISTS (SELECT ItemID
-    FROM ItemBids
-    WHERE Currently >= 100)
+    FROM Items
+    WHERE Currently > 100);
