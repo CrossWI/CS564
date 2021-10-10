@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS Items;
 DROP TABLE IF EXISTS Bids;
 DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS ItemCategory;
+DROP TABLE IF EXISTS CategoryInfos;
 DROP TABLE IF EXISTS Categories;
 
 CREATE TABLE Items(ItemID int PRIMARY KEY,
@@ -31,10 +31,11 @@ CREATE TABLE Bids(ItemID int,
 				  FOREIGN KEY (BidderID) REFERENCES Users(UserID),
 				  PRIMARY KEY (ItemID, Time));
 
-CREATE TABLE ItemCategory(ItemID int,
+CREATE TABLE CategoryInfos(ItemID int,
 					  CategoryID int,
 					  FOREIGN KEY (ItemID) REFERENCES Items(ItemID),
 					  FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID),
 					  PRIMARY KEY (ItemID, CategoryID));
+					  
 CREATE TABLE Categories(CategoryID int PRIMARY KEY,
 						Name CHAR(300));

@@ -75,22 +75,20 @@ item in the data set. Your job is to extend this functionality to create all
 of the necessary SQL tables for your database.
 """
 
-itemsTable = {}
-usersTable = {}
-bidsTable = defaultdict(list)
-itemCategoryTable = defaultdict(list)
-categoriesTable = {}
+items_tab = {}
+users = {}
+bids = defaultdict(list)
+category_infos = defaultdict(list)
+categories = {}
 categoryID = 0
 def parseJson(json_file):
-	global itemsTable
-	global usersTable
-	global bidsTable
-	global itemCategoryTable
-	global categoriesTable
+	global items_tab
+	global users
+	global bids
+	global category_infos
+	global categories
 	global categoryID
-
 	with open(json_file, 'r') as f:
-
 		items = loads(f.read())['Items'] # creates a Python dictionary of Items for the supplied json file
 		for item in items:
 			"""
@@ -99,90 +97,102 @@ def parseJson(json_file):
 			the SQL tables based on your relation design
 			"""
 			# get item data:
-			itemID = item["ItemID"]
-			seller = item["Seller"]
-			sellerID = seller["UserID"]
-			if item["Description"] is None:
-				item["Description"] = "NULL"
-			itemsTable[itemID] = [
-				itemID,
-				item["Name"],
-				transformDttm(item["Started"]),
-				transformDttm(item["Ends"]),
-				transformDollar(item["Currently"]),
-				sellerID,
-				item["Description"],
-				transformDollar(item["First_Bid"]),
-				item["Number_of_Bids"],
-				item.get("Buy_Price", "NULL")
-			]
-			# add sellers to users
-			if sellerID in usersTable:
-				# not sure if updating is currect but this should update isSeller
-				usersTable[sellerID][-2] = "1"
+			ItemID = item['ItemID']
+			Name = item['Name']
+			Started = item['Started']
+			Ends = item['Ends']
+			Currently = item['Currently']
+			First_Bid = item['First_Bid']
+			Number_of_Bids = item['Number_of_Bids']
+			Seller = item['Seller']
+			SellerID = Seller['UserID']
+			Buy_Price = ''
+
+			if (Seller == None):
+				SellerID = 'NULL'
+			if ('Buy_Price' in item.keys()):
+				Buy_Price = item['Buy_Price']
 			else:
-				usersTable[sellerID] = [
-					sellerID,
-					item["Location"],
-					item["Country"],
-					seller["Rating"],
-					"1",
-					"0"
-				]
-			if item["Bids"]:
-				for bid in item["Bids"]:
-					info = bid["Bid"]
-					bidder = info["Bidder"]
-					bidderID = bidder["UserID"]
-					bidsTable[itemID].append(
-						(
-						bidderID,
-						transformDttm(info["Time"]),
-						transformDollar(info["Amount"]),
-						)
-					)
-					if bidderID in usersTable:
-						usersTable[bidderID][-1] = "1"
+				Buy_Price = 'NULL'
+			
+			if (item['Description'] == None):
+				item['Description'] = 'NULL'
+			Description = item['Description']
+
+			items_tab[ItemID] = [ItemID, Name, transformDttm(Started), transformDttm(Ends), transformDollar(Currently), SellerID, Description, transformDollar(First_Bid), Number_of_Bids, Buy_Price]
+
+			# get user and bid data:
+			Location = item['Location']
+			Country = item['Country']
+			Rating = item['Seller']['Rating']
+			Bids = item['Bids']
+
+			if (SellerID in users):
+				users[SellerID][-2] = '1'
+			else: 
+				users[SellerID] = [SellerID, Location, Country, Rating, '1', '0']
+			
+			if (Bids != None):
+				for bid in Bids:
+					Bidder = bid['Bid']['Bidder']
+					BidderID = Bidder['UserID']
+					Location = ''
+					Country = ''
+					Rating = ''
+
+					Time = bid['Bid']['Time']
+					Amount = bid['Bid']['Amount']
+
+					if ('Location' in Bidder.keys()):
+						Location = Bidder['Location']
 					else:
-						usersTable[bidderID] = [
-							bidderID,
-							bidder.get("Location", "NULL"),
-							bidder.get("Country", "NULL"),
-							bidder["Rating"],
-							"0",
-							"1"
-						]
-			# Categories
+						Location = 'NULL'
+					if ('Country' in Bidder.keys()):
+						Country = Bidder['Country']
+					else:
+						Country = 'NULL'
+					if ('Rating' in Bidder.keys()):
+						Rating = Bidder['Rating']
+					else:
+						Rating = 'NULL'
+
+					bids[ItemID].append((BidderID, transformDttm(Time), transformDollar(Amount)))
+
+					if (BidderID in users):
+						users[BidderID][-1] = 1
+					else:
+						users[BidderID] = [BidderID, Location, Country, Rating, '0', '1']
+
 			for category in item["Category"]:
-				if category not in categoriesTable:
+				if (category not in categories):
 					categoryID += 1
-					categoriesTable[category] = str(categoryID)
-				category_info = categoriesTable[category]
-				if category_info not in itemCategoryTable[itemID]:
-					itemCategoryTable[itemID].append(category_info)
+					categories[category] = str(categoryID)
 
-
-
-def writeToDat():
-	replace_quote = lambda string: '"' + string.replace("'", "''").replace('"', '""') + '"'
-	write_line = lambda string: columnSeparator.join(replace_quote(s) for s in string) + "\n"
-
-	with open("items.dat", "w") as items:
-		items.writelines(write_line(item) for item in itemsTable.values())
-	with open("users.dat", "w") as users:
-		users.writelines(write_line(user) for user in usersTable.values())
-	with open("bids.dat", "w") as bids:
-		bids.writelines(itemID + columnSeparator + write_line(bid)
-		for itemID, itemBid in bidsTable.items()
-		for bid in itemBid)
-	with open("categories.dat", "w") as categories:
-		categories.writelines(replace_quote(name) + columnSeparator + ID + "\n"
-		for name, ID in categoriesTable.items())
-	with open("itemcategories.dat", "w") as itemcategories:
-		itemcategories.writelines("\n".join(itemID + columnSeparator + categorID for categorID in categoryIDs) + "\n"
-		for itemID, categoryIDs in itemCategoryTable.items())
+				category_info = categories[category]
+				if (category_info not in category_infos[ItemID]):
+					category_infos[ItemID].append(category_info)
 	
+def writeToFiles():
+	replace_quote = lambda string: '"' + string.replace("'", "''").replace('"', '""') + '"'
+	write_line = lambda string: columnSeparator.join(replace_quote(str(s)) for s in string) + "\n"
 
+	with open("Items.dat", "w") as f1:
+		f1.writelines(write_line(item) for item in items_tab.values())
+
+	with open("Users.dat", "w") as f2:
+		f2.writelines(write_line(user) for user in users.values())
+
+	with open("Bids.dat", "w") as f3:
+		f3.writelines(itemID + '|' + write_line(bid)
+		for itemID, itemBid in bids.items()
+		for bid in itemBid)
+
+	with open("Category_Infos.dat", "w") as f4:
+		f4.writelines("\n".join(itemID + '|' + categorID for categorID in categoryIDs) + "\n"
+		for itemID, categoryIDs in category_infos.items())
+	with open("Categories.dat", "w") as f5:
+		f5.writelines(replace_quote(name) + '|' + categoryID + "\n"
+		for name, categoryID in categories.items())
 
 """
 Loops through each json files provided on the command line and passes each file
@@ -197,7 +207,7 @@ def main(argv):
 		if isJson(f):
 			parseJson(f)
 			print("Success parsing " + f)
-	writeToDat()
+	writeToFiles()
 
 if __name__ == '__main__':
 	main(sys.argv)
