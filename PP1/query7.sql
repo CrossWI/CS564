@@ -1,5 +1,3 @@
-SELECT COUNT(ItemID)
-FROM Items
-WHERE ItemID EXISTS (SELECT ItemID
-    FROM Items
-    WHERE Currently > 100);
+SELECT COUNT(DISTINCT ItemID)
+FROM Bids
+WHERE Amount > 100;
