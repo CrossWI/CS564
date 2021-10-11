@@ -29,8 +29,6 @@ from json import loads
 from re import sub
 from collections import defaultdict
 
-columnSeparator = "|"
-
 # Dictionary of months used for date transformation
 MONTHS = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06',\
 		'Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
@@ -82,11 +80,6 @@ item_categories = defaultdict(list)
 categories = {}
 categoryID = 0
 def parseJson(json_file):
-	global items_tab
-	global users
-	global bids
-	global item_categories
-	global categories
 	global categoryID
 	with open(json_file, 'r') as f:
 		items = loads(f.read())['Items'] # creates a Python dictionary of Items for the supplied json file
@@ -171,27 +164,30 @@ def parseJson(json_file):
 				category_info = categories[category]
 				if (category_info not in item_categories[ItemID]):
 					item_categories[ItemID].append(category_info)
-	
-def writeToFiles():
-	replace_quote = lambda string: '"' + string.replace("'", "''").replace('"', '""') + '"'
-	write_line = lambda string: columnSeparator.join(replace_quote(str(s)) for s in string) + "\n"
 
-	with open("Items.dat", "w") as f1:
+def replace_quotes(string):
+	return '"' + string.replace('"', '\"\"').replace("'", "\'\'") + '"'
+
+def writeToFiles():
+	write_line = lambda string: '|'.join(replace_quotes(str(s)) for s in string) + '\n'
+
+	with open('Items.dat', 'w') as f1:
 		f1.writelines(write_line(item) for item in items_tab.values())
 
-	with open("Users.dat", "w") as f2:
+	with open('Users.dat', 'w') as f2:
 		f2.writelines(write_line(user) for user in users.values())
 
-	with open("Bids.dat", "w") as f3:
+	with open('Bids.dat', 'w') as f3:
 		f3.writelines(itemID + '|' + write_line(bid)
 		for itemID, itemBid in bids.items()
 		for bid in itemBid)
 
-	with open("ItemCategories.dat", "w") as f4:
-		f4.writelines("\n".join(itemID + '|' + categorID for categorID in categoryIDs) + "\n"
+	with open('ItemCategories.dat', 'w') as f4:
+		f4.writelines('\n'.join(itemID + '|' + categoryID for categoryID in categoryIDs) + '\n'
 		for itemID, categoryIDs in item_categories.items())
-	with open("Categories.dat", "w") as f5:
-		f5.writelines(replace_quote(name) + '|' + categoryID + "\n"
+
+	with open('Categories.dat', 'w') as f5:
+		f5.writelines(replace_quotes(name) + '|' + categoryID + '\n'
 		for name, categoryID in categories.items())
 
 """

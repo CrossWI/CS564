@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<pset>
+
+    <!--
+        CS 564, FALL 2021
+        PROBLEM SET 1 SUBMISSION TEMPLATE
+
+        Please copy and paste your SQL queries into the appropriate spots below. 
+
+        When submitting SQL queries, please do not include the initial 
+        %sql or %%sql IPython commands. Just include the SQL code.
+
+        DO NOT DELETE THE <![CDATA[ ... ]]> LINES IN EACH <answer> TAG!
+        Doing so will break the autograder. To avoid accidentally breaking
+        something, please leave all existing comments in this template
+        intact in your submission.
+    -->
+
+    <student>
+        <name>
+            <!-- Insert your full name on the line below. -->
+			Cameron Cross
+        </name>
+        <netid>
+            <!-- Insert your NetID (NOT your student ID number!) below. -->
+			cacross3
+
+        </netid>
+        <studentid>
+            <!-- Insert your student ID number below. -->
+			9081611148
+        </studentid>
+    </student>
+
+
+    <!-- BEGIN PROBLEM 1 -->
+    <answer number="1a">
+        <!-- Paste your solution to problem 1, part (a) below this line. --><![CDATA[
+
+%%sql 
+SELECT A.i AS i, B.j AS j, (A.val+B.val) AS val
+FROM A
+JOIN B
+WHERE A.i == B.i AND A.j == B.j
+
+        ]]><!-- End problem 1, part (a). -->
+    </answer>
+    <answer number="1b">
+        <!-- Paste your solution to problem 1, part (b) below this line. --><![CDATA[
+
+%%sql
+SELECT SUM(A*B) AS DotProduct
+FROM(SELECT A,B
+	 FROM (SELECT val AS A,i,j FROM A WHERE j == 2) AS A
+	 JOIN (SELECT val AS B,i AS B_i,j AS B_j FROM B WHERE j == 1)
+ 	 WHERE A.i == B_i
+	 GROUP BY A.i
+	)
+;
+
+        ]]><!-- End problem 1, part (b). -->
+    </answer>
+    <answer number="1c">
+        <!-- Paste your solution to problem 1, part (c) below this line. --><![CDATA[
+
+%%sql
+SELECT A.i AS i, B.j AS j, SUM(A.val*B.val) as val
+FROM A
+INNER JOIN B
+ON A.j == B.i
+GROUP BY A.i, B.j;
+
+        ]]><!-- End problem 1, part (c). -->
+    </answer>
+    <answer number="1d">
+        <!-- Paste your solution to problem 1, part (d) below this line. --><![CDATA[
+
+%%sql
+SELECT A.i AS i, B.j AS j, SUM(A.val*B.val) AS val
+FROM A
+INNER JOIN (SELECT A.i AS i, B.j AS j, SUM(A.val*B.val) AS val
+		  	FROM A
+			INNER JOIN (SELECT A.i AS i, B.j AS j, SUM(A.val*B.val) AS val
+						FROM A
+						INNER JOIN (SELECT * FROM A) AS B
+						ON A.j == B.i
+						GROUP BY A.i, B.j) AS B
+			ON A.j == B.i
+			GROUP BY A.i, B.j
+		) AS B
+ON A.j == B.i
+GROUP BY A.i,B.j;
+
+        ]]><!-- End problem 1, part (d). -->
+    </answer>
+    <!-- END PROBLEM 1 -->
+
+
+    <!-- BEGIN PROBLEM 2 -->
+    <answer number="2a">
+        <!-- Paste your solution to problem 2, part (a) below this line. --><![CDATA[
+
+%%sql
+WITH HolidaySales AS (SELECT Store, SUM(WeeklySales) AS AllSales
+					  FROM Sales JOIN Holidays
+					  WHERE Sales.WeekDate == Holidays.WeekDate AND IsHoliday == "TRUE"
+					  GROUP BY Store)
+SELECT Store, AllSales
+FROM HolidaySales
+ORDER BY AllSales DESC
+LIMIT 1;
+
+        ]]><!-- End problem 2, part (a). -->
+    </answer>
+    <answer number="2b">
+        <!-- Paste your solution to problem 2, part (b) below this line. --><![CDATA[
+
+%%sql 
+WITH HolidaySales AS (SELECT Sales.WeekDate, SUM(WeeklySales) AS TotalSales
+					  FROM Sales, Holidays
+					  WHERE Sales.WeekDate == Holidays.WeekDate AND Holidays.IsHoliday == "TRUE"
+					  GROUP BY Sales.WeekDate),
+	 HolidayAvg AS (SELECT AVG(TotalSales) AS avg
+	 				FROM HolidaySales),
+	 NonHolidaySales AS (SELECT * FROM Sales, Holidays, HolidayAvg
+						 WHERE IsHoliday == "FALSE" AND Sales.WeekDate == Holidays.WeekDate
+						 GROUP BY Sales.WeekDate
+						 HAVING SUM(Sales.WeeklySales) > avg)
+SELECT COUNT(WeekDate) AS NumNonHolidays FROM NonHolidaySales;
+
+        ]]><!-- End problem 2, part (b). -->
+    </answer>
+    <answer number="2c">
+        <!-- Paste your solution to problem 2, part (c) below this line. --><![CDATA[
+
+%%sql
+SELECT Stores.Type, SUM(WeeklySales) AS TotalSales
+FROM Sales, Stores
+WHERE (WeekDate LIKE '%-06-%'
+OR WeekDate LIKE '%-07-%'
+OR WeekDate LIKE '%-08-%')
+AND Sales.Store == Stores.Store
+GROUP BY Stores.Type;
+
+        ]]><!-- End problem 2, part (c). -->
+    </answer>
+    <!-- END PROBLEM 2 -->
+
+
+    <!-- BEGIN PROBLEM 3 -->
+    <answer number="3a">
+        <!-- Paste your solution to problem 3, part (a) below this line. --><![CDATA[
+
+%%sql
+SELECT B AS company, d AS distance
+FROM streets
+WHERE d <= 9 AND A == "UW-Madison"
+UNION SELECT s2.B AS company, (s1.d + s2.d) AS distance
+	  FROM streets AS s1, streets AS s2
+	  WHERE distance <= 9 AND s1.A == "UW-Madison"
+	  AND s1.B == s2.A AND s2.B != s1.A
+UNION SELECT s3.B AS company, (s1.d + s2.d + s3.d) AS distance 
+	  FROM streets AS s1, streets AS s2, streets AS s3
+	  WHERE distance <= 9 AND s1.A == "UW-Madison"
+	  AND s1.B == s2.A AND s2.direction == "F"
+	  AND s2.B == s3.A AND s2.direction == "F" AND s3.direction == "F"
+	  AND s3.B != s1.A;
+
+        ]]><!-- End problem 3, part (a). -->
+    </answer>
+    <answer number="3b">
+        <!-- Paste your solution to problem 3, part (b) below this line. --><![CDATA[
+
+%%sql
+DROP VIEW IF EXISTS farm_stop;
+CREATE VIEW farm_stop AS
+SELECT A, B, d AS distance, 10*d AS id
+FROM streets
+WHERE direction == "F"
+UNION SELECT s1.A, s2.B, (s1.d + s2.d) AS distance, (10*s1.d + 7*s2.d) AS id
+	  FROM streets AS s1, streets AS s2
+	  WHERE s1.B == s2.A 
+	  AND s1.direction == "F" AND s2.direction == "F"
+UNION SELECT s1.A, s3.B, (s1.d + s2.d + s3.d) AS distance, (10*s1.d + 7*s2.d + 3*s3.d) AS id
+	  FROM streets AS s1, streets AS s2, streets AS s3
+	  WHERE s1.B == s2.A AND s2.B == s3.A AND s1.A != s3.B
+	  AND s1.direction == "F" AND s2.direction == "F" AND s3.direction == "F";
+
+SELECT f1.B AS company_1, f2.B AS company_2, (f1.distance + f2.distance) AS distance
+FROM farm_stop AS f1, farm_stop AS f2
+WHERE f1.A == "UW-Madison" AND f2.A == "UW-Madison" AND f1.B != f2.B
+	  AND (f1.distance + f2.distance) <= 15
+GROUP BY f1.id + f2.id;
+
+        ]]><!-- End problem 3, part (b). -->
+    </answer>
+    <answer number="3c">
+        <!-- Paste your solution to problem 3, part (c) below this line. --><![CDATA[
+
+%%sql
+SELECT s1.A AS A, s2.A AS B, s3.A AS C, (s.d + s2.d + s3.d) AS distance
+FROM streets AS s1, streets AS s2, streets AS s3
+WHERE s1.B == s2.A AND s2.B == s3.A AND s1.direction == "F" AND s2.direction == "F" AND s3.direction == "F" AND s3.B == s1.A
+GROUP BY distance
+HAVING MIN(3*s1.d + 4*s2.d + 5*s3.d);
+
+        ]]><!-- End problem 3, part (c). -->
+    </answer>
+    <!-- END PROBLEM 3 -->
+
+
+</pset>
