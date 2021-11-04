@@ -38,19 +38,40 @@ BufMgr::BufMgr(std::uint32_t bufs)
   clockHand = bufs - 1;
 }
 
-void BufMgr::advanceClock() {}
+void BufMgr::advanceClock() {
+  // find the size of the buffer pool
+  int clockSize = sizeof(bufPool)/sizeof(bufPool[0]);
+  
+  // if clockHand == clockSize, reset clockHand to position 0
+  clockHand = (clockHand + 1) % clockSize;
+}
 
 void BufMgr::allocBuf(FrameId& frame) {}
 
 void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {}
 
-void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {}
+void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
+  try {
+    // find the frame nmber
+    hashTable.lookup(file, pageNo, clockHand);
+  }
+  catch (badgerdb::HashNotFoundException& e) {
+    // throw PageNotPinnedException
+    throw(PageNotPinnedException(file.filename(), pageNo, clockHand));
+  }
+}
 
 void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {}
 
 void BufMgr::flushFile(File& file) {}
 
-void BufMgr::disposePage(File& file, const PageId PageNo) {}
+void BufMgr::disposePage(File& file, const PageId PageNo) {
+  //remove the page from buffer pool
+  hashTable.remove(file,PageNo);
+  
+  // delete the page
+  file.deletePage(PageNo);
+}
 
 void BufMgr::printSelf(void) {
   int validFrames = 0;
