@@ -72,9 +72,8 @@ void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
     allocBuf(frameNo);
     file.readPage(pageNo);
 
-    //find available frameNo
-
     hashTable.insert(file, pageNo, frameNo);
+    Set(file, pageNo);
   }
 
 
