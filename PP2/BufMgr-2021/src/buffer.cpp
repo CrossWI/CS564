@@ -46,9 +46,29 @@ void BufMgr::advanceClock() {
   clockHand = (clockHand + 1) % clockSize;
 }
 
-void BufMgr::allocBuf(FrameId& frame) {}
+void BufMgr::allocBuf(FrameId& frame) {
+	// Throw BufferExceededException if all buffer frames are pinned
 
-void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {}
+	// Allocates a free frame using the clock algorithm
+
+	// If the buffer frame allocated has a valid page in it, you remove the appropriate entry from the hash table.
+}
+
+void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
+	// Check if in buffer using lookup()
+
+	// Case 1: Not in buffer pool
+	// Call allocBuf() to allocate a buffer frame
+	// Call file.readPage() to read page from disk
+	// Insert page into hashtable
+	// Invoke Set() to update pinCnt for the page to 1
+	// Return pointer to frame containing page
+
+	// Case 2: In buffer pool
+	// Set appropriate refbit
+	// Increment pinCnt
+	// Return pointer to frame containing page
+}
 
 void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
   try {
@@ -61,9 +81,22 @@ void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
   }
 }
 
-void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {}
+void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
+	// Allocate empty page in specified file using file.allocatePage()
+	// Call allocBuf() to obtain buffer pool frame
+	// Intert entry into hashtable and use Set()
+	// Return page number of allocated page and pointer to buffer frame allocated for the page
+}
 
-void BufMgr::flushFile(File& file) {}
+void BufMgr::flushFile(File& file) {
+	// Scan bufTable for pages belonging to file
+	// For each:
+		// If page is dirty, call file.writePage() to flush to disk, set dirty bit->false
+		// Remove page from hashtable
+		// Invoke Clear() 
+	// Throws PagePinnedException if some page of the file is pinned
+	// Throws BadBufferException if an invalid page is encountered
+}
 
 void BufMgr::disposePage(File& file, const PageId PageNo) {
   //remove the page from buffer pool

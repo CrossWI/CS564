@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<pset>
+
+    <!--
+        CS 564, Fall 2021
+        PROBLEM SET 2 SUBMISSION TEMPLATE
+
+        Please copy and paste your SQL queries (and potentially Python and Latex code) 
+	into the appropriate spots below. 
+
+        When submitting SQL queries, please do not include the intitial 
+        %sql or %%sql IPython commands. Just include the SQL code.
+
+        DO NOT DELETE THE <![CDATA[ ... ]]> LINES IN EACH <answer> TAG!
+        Doing so will break the autograder. To avoid accidentally breaking
+        something, please leave all existing comments in this template
+        intact in your submission.
+    -->
+
+    <student>
+        <name>
+Cameron Cross
+        </name>
+        <netid>
+            <!-- Insert your NetID (NOT your student ID number!) below. -->
+cacross3
+        </netid>
+        <studentid>
+            <!-- Insert your student ID number below. -->
+			9081611148
+        </studentid>
+    </student>
+
+
+    <!-- BEGIN PROBLEM 1 -->
+    <answer number="1a">
+        <!-- Paste your solution to problem 1, part (a) below this line. --><![CDATA[
+
+%%sql
+SELECT *
+FROM hospital h1, hospital h2 
+WHERE h1.provider == h2.provider 
+AND (h1.hospital != h2.hospital OR 
+     h1.address != h2.address OR 
+	 h1.city != h2.city OR 
+	 h1.state != h2.state OR 
+	 h1.zip != h2.zip OR 
+	 h1.county != h2.county OR 
+	 h1.phone_number != h2.phone_number OR 
+	 h1.hospital_type != h2.hospital_type OR 
+	 h1.hospital_owner != h2.hospital_owner OR 
+	 h1.emergency_service != h2.emergency_service OR 
+	 h1.condition != h2.condition OR 
+	 h1.measure_code != h2.measure_code)
+LIMIT 5;
+
+        ]]><!-- End problem 1, part (a). -->
+    </answer>
+    <answer number="1b">
+        <!-- Paste your solution to problem 1, part (b) below this line. --><![CDATA[
+
+%%sql 
+SELECT *
+FROM hospital h1, hospital h2
+WHERE (h1.zip == h2.zip) AND (h1.city != h2.city OR h1.state != h2.state)
+LIMIT 10;
+
+        ]]><!-- End problem 1, part (b). -->
+    </answer>
+    <!-- END PROBLEM 1 -->
+
+
+    <!-- BEGIN PROBLEM 2 -->
+    <answer number="2a">
+        <!-- Paste your solution to problem 2, part (a) below this line. --><![CDATA[
+
+answer = True
+explanation = '{A,B} is a superkey because its closure is {A,B,D,E,C,F} with is the relation S'
+
+        ]]><!-- End problem 2, part (a). -->
+    </answer>
+    <answer number="2b">
+        <!-- Paste your solution to problem 2, part (b) below this line. --><![CDATA[
+
+answer = False
+explanation = 'Using the Chase Algorithm, there does not exist a row in which all the data is not subscriptted'
+
+        ]]><!-- End problem 2, part (b). -->
+    </answer>    
+    <answer number="2c">
+        <!-- Paste your solution to problem 2, part (c) below this line. --><![CDATA[
+
+answer = False
+explanation = 'FDs of ABC: {A} -> {C}, FDs of CDE: {D} -> {C}, FDs of EFA: {A} -> {E,F}. We cannot imply {A} -> {D} or {D} -> {F}'
+
+        ]]><!-- End problem 2, part (c). -->
+    </answer>
+    <answer number="2d">
+        <!-- Paste your solution to problem 2, part (d) below this line. --><![CDATA[
+
+answer = True
+explanation = 'We have FDs: {A} -> {D}, {D} -> {C}, {D} -> {F}. Thus, {A} -> {C} and {A} -> {F}. Then it follows that {A} -> {E,F}'
+
+        ]]><!-- End problem 2, part (d). -->
+    </answer>
+    <answer number="2e">
+        <!-- Paste your solution to problem 2, part (e) below this line. --><![CDATA[
+
+answer = False
+explanation = '{A} -> {D} is a FD of S, but {A} is not a superkey (its closure is {A,D,E,C,F}, thus missing B). This violates the def of BCNF'
+
+        ]]><!-- End problem 2, part (e). -->
+    </answer>
+    <!-- END PROBLEM 2 -->
+
+    <!-- BEGIN PROBLEM 3 -->
+    <answer number="3a">
+        <!-- Paste your solution to problem 3, part (a) below this line. --><![CDATA[
+
+$$(\pi_{name}(\sigma_{year=2018}(Conference) \bowtie Author))\cap(\pi_{name}(\sigma_{affiliation="UW-Madison"}(Person)))$$ 
+
+        ]]><!-- End problem 3, part (a). -->
+    </answer>
+    <answer number="3b">
+        <!-- Paste your solution to problem 3, part (b) below this line. --><![CDATA[
+
+$$\pi_{name}(\pi_{artid}(\sigma_{name="John Doe"}(People)) \bowtie Author) \bowtie \pi_{artid,name}(\sigma_{name\neq"John Doe"}(Person) \bowtie Author)))$$
+
+        ]]><!-- End problem 3, part (b). -->
+    </answer>
+    <answer number="3c">
+        <!-- Paste your solution to problem 3, part (c) below this line. --><![CDATA[
+
+$$\gamma_{COUNT(artid)}(((\sigma_{year=2018\wedge name="SIGMOD"}(Conference))-(\sigma_{year=2019\wedge name="SIGMOD"}(Conference)))\bowtie Article) \bowtie Author)$$
+
+        ]]><!-- End problem 3, part (c). -->
+    </answer>
+    <answer number="3d">
+    <!-- Paste your solution to problem 3, part (d) below this line. --><![CDATA[
+
+$$\gamma_{pid,COUNT(artid)}((\sigma_{C.name="SIGMOD"}(C)\bowtie_{A.confid=C.confid} A)\bowtie_{U.artid=A.artid} U)$$
+
+        ]]><!-- End problem 3, part (d). -->
+    </answer>
+    <!-- END PROBLEM 3 -->
+
+</pset>
