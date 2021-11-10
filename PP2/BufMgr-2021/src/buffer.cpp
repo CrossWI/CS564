@@ -57,27 +57,47 @@ void BufMgr::allocBuf(FrameId& frame) {
 void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
 	// Check if in buffer using lookup()
 
-	// Case 1: Not in buffer pool
+  // Case 1: In buffer pool
+	// Set appropriate refbit
+	// Increment pinCnt
+	// Return pointer to frame containing page
+  FrameId frameNo = -1;
+
+  try {
+    // see if page exists in buffer pool
+    hashTable.lookup(file, pageNo, frameNo);
+    //increment pin count
+    bufDescTable[frameNo].pinCnt++;
+  } catch (badgerdb::HashNotFoundException& e) {
+    allocBuf(frameNo);
+    file.readPage(pageNo);
+
+    //find available frameNo
+
+    hashTable.insert(file, pageNo, frameNo);
+  }
+
+
+	// Case 2: Not in buffer pool
 	// Call allocBuf() to allocate a buffer frame
 	// Call file.readPage() to read page from disk
 	// Insert page into hashtable
 	// Invoke Set() to update pinCnt for the page to 1
 	// Return pointer to frame containing page
 
-	// Case 2: In buffer pool
-	// Set appropriate refbit
-	// Increment pinCnt
-	// Return pointer to frame containing page
+
 }
 
 void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
+  FrameId frameNo = -1;
   try {
     // find the frame nmber
-    hashTable.lookup(file, pageNo, clockHand);
+    hashTable.lookup(file, pageNo, frameNo);
+    bufDescTable[frameNo].pinCnt--;
   }
   catch (badgerdb::HashNotFoundException& e) {
     // throw PageNotPinnedException
-    throw(PageNotPinnedException(file.filename(), pageNo, clockHand));
+    throw(PageNotPinnedException(file.filename(), pageNo, frameNo));
   }
 }
 
