@@ -76,15 +76,6 @@ void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
     Set(file, pageNo);
   }
 
-
-	// Case 2: Not in buffer pool
-	// Call allocBuf() to allocate a buffer frame
-	// Call file.readPage() to read page from disk
-	// Insert page into hashtable
-	// Invoke Set() to update pinCnt for the page to 1
-	// Return pointer to frame containing page
-
-
 }
 
 void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
@@ -101,13 +92,29 @@ void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
 }
 
 void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
-	// Allocate empty page in specified file using file.allocatePage()
-	// Call allocBuf() to obtain buffer pool frame
-	// Intert entry into hashtable and use Set()
-	// Return page number of allocated page and pointer to buffer frame allocated for the page
+	file.allocatePage()
+	FrameId frameNo = -1;
+	allocBuf(frameNo)
+	hashTable.insert(file, pageNo, frameNo);
+  Set(file, pageNo);
+
+  // Allocate empty page in specified file using file.allocatePage()
+  // Call allocBuf() to obtain buffer pool frame
+  // Intert entry into hashtable and use Set()
+  // Return page number of allocated page and pointer to buffer frame allocated for the page
 }
 
 void BufMgr::flushFile(File& file) {
+	try {
+		for (buf : bufTable) {
+
+		}
+	} catch (badgerdb::PagePinnedException& e) {
+			throw(PageNotPinnedException(file.filename(), pageNo, frameNo));
+	} catch (badgerdb::BadBufferException& e) {
+			throw(BadBufferException(file.filename(), pageNo, frameNo));
+	}
+
 	// Scan bufTable for pages belonging to file
 	// For each:
 		// If page is dirty, call file.writePage() to flush to disk, set dirty bit->false
