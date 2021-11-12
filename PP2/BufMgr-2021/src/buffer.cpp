@@ -49,12 +49,13 @@ void BufMgr::allocBuf(FrameId& frame) {
 	// count for clockHand
 	int count = 0;
 	// true if frame can be placed in buffer pool
-	bool canAllocate = false
-	while (count < numBufs * 2) {
+	bool canAllocate = false;
+	while (count < numBufs * 2)
+	{
 		if (bufDescTable[frame].valid == true) {
 			if (bufDescTable[frame].refbit == true) {
 				// clear refbit
-				bufDescTable[frame].refbit == false;
+				bufDescTable[frame].refbit = false;
 				// advance clock pointer
 				advanceClock();
 				count++;
@@ -66,13 +67,13 @@ void BufMgr::allocBuf(FrameId& frame) {
 				} else {
 					if (bufDescTable[frame].dirty == true) {
 						// flush page to disk
-						bufDescTable[frame].file.writePage(bufPool[i]);
+						bufDescTable[frame].file.writePage(bufPool[frame]);
 						// set dirty bit
 						bufDescTable[frame].dirty = false;
 						// remove page from hash table
-						hashTable.remove(file, pageNo);
+						hashTable.remove(bufDescTable[frame].file, bufDescTable[frame].pageNo);
 						// clear page
-						bufDescTable[frame].Clear();
+						bufDescTable[frame].clear();
 					}
 					// set frame to open position
 					frame = clockHand;
@@ -112,7 +113,7 @@ void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
 		// insert page into hash table
     hashTable.insert(file, pageNo, frameNo);
 		// set up frame properly
-    bufDescTable[frame].Set(file, pageNo);
+    bufDescTable[frameNo].Set(file, pageNo);
   }
 
 }
@@ -140,12 +141,11 @@ void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
 }
 
 void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
-	file.allocatePage()
 	FrameId frameNo = -1;
-	allocBuf(frameNo)
-	bufPool[frameNo] = emptyPage;
+	allocBuf(frameNo);
+	bufPool[frameNo] = file.allocatePage();
 	hashTable.insert(file, pageNo, frameNo);
-  bufDescTable[frame].Set(file, pageNo);
+  bufDescTable[frameNo].Set(file, pageNo);
 
   // Allocate empty page in specified file using file.allocatePage()
   // Call allocBuf() to obtain buffer pool frame
@@ -154,7 +154,7 @@ void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
 }
 
 void BufMgr::flushFile(File& file) {
-	for (FrameId i : numBufs) {
+	for (FrameId i = 0; i < (int) numBufs; i++) {
 		PageId pageNo = bufDescTable[i].pageNo;
 		// check that pages belong to file
 		if (bufDescTable[i].file == file) {
@@ -175,7 +175,7 @@ void BufMgr::flushFile(File& file) {
 				// remove page from hash table
 				hashTable.remove(file, pageNo);
 				// clear page
-				bufDescTable[i].Clear();
+				bufDescTable[i].clear();
 			}
 		}
 	}
@@ -193,7 +193,7 @@ void BufMgr::disposePage(File& file, const PageId PageNo) {
 		FrameId frameNo = -1;
 		hashTable.lookup(file, PageNo, frameNo);
 		// free frame
-		bufDescTable[frameNo].Clear();
+		bufDescTable[frameNo].clear();
   	// remove the page from buffer pool
   	hashTable.remove(file, PageNo);
 	} catch (badgerdb::HashNotFoundException& e) {}
