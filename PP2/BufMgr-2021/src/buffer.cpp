@@ -48,21 +48,21 @@ void BufMgr::advanceClock() {
 void BufMgr::allocBuf(FrameId& frame) {
 	// count for clockHand
 	int count = 0;
-	// true if frame can be placed in buffer pool
-	bool canAllocate = false;
-	while (count < numBufs * 2)
-	{
+
+	while (1) {
+		if (count > (int) numBufs) {
+			throw BufferExceededException();
+		}
+
 		if (bufDescTable[frame].valid == true) {
 			if (bufDescTable[frame].refbit == true) {
 				// clear refbit
 				bufDescTable[frame].refbit = false;
-				// advance clock pointer
-				advanceClock();
-				count++;
+				// increment count
+				count++;				
 			} else {
 				if (bufDescTable[frame].pinCnt > 0) {
-					// advance clock pointer
-					advanceClock();
+					// increment count
 					count++;
 				} else {
 					if (bufDescTable[frame].dirty == true) {
@@ -70,17 +70,16 @@ void BufMgr::allocBuf(FrameId& frame) {
 						bufDescTable[frame].file.writePage(bufPool[frame]);
 						// set dirty bit
 						bufDescTable[frame].dirty = false;
-						// remove page from hash table
-						hashTable.remove(bufDescTable[frame].file, bufDescTable[frame].pageNo);
-						// clear page
-						bufDescTable[frame].clear();
 					}
+					// remove page from hash table
+					hashTable.remove(bufDescTable[frame].file, bufDescTable[frame].pageNo);
+					// clear page
+					bufDescTable[frame].clear();
 					// set frame to open position
 					frame = clockHand;
 					// call Set() on the frame
 					bufDescTable[frame].Set(bufDescTable[frame].file, bufDescTable[frame].pageNo);
 					// use Frame
-					canAllocate = true;
 					break;
 				}
 			}
@@ -90,11 +89,9 @@ void BufMgr::allocBuf(FrameId& frame) {
 			// call Set() on the frame
 			bufDescTable[frame].Set(bufDescTable[frame].file, bufDescTable[frame].pageNo);
 		}
+		// advance clock pointer
+		advanceClock();
 	}
-	// all buffer frames are pinned
-	if (canAllocate == false) {
-  	throw BufferExceededException();
-  }
 }
 
 void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
@@ -146,6 +143,7 @@ void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
 	bufPool[frameNo] = file.allocatePage();
 	hashTable.insert(file, pageNo, frameNo);
   bufDescTable[frameNo].Set(file, pageNo);
+	page = &bufPool[frameNo]
 
   // Allocate empty page in specified file using file.allocatePage()
   // Call allocBuf() to obtain buffer pool frame
@@ -154,7 +152,7 @@ void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
 }
 
 void BufMgr::flushFile(File& file) {
-	for (FrameId i = 0; i < (int) numBufs; i++) {
+	for (FrameId i = 0; i < (uint32_t) numBufs; i++) {
 		PageId pageNo = bufDescTable[i].pageNo;
 		// check that pages belong to file
 		if (bufDescTable[i].file == file) {
