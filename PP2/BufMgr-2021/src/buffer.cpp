@@ -54,6 +54,9 @@ void BufMgr::allocBuf(FrameId& frame) {
 			throw BufferExceededException();
 		}
 
+		// advance clock pointer
+		advanceClock();
+
 		if (bufDescTable[frame].valid == true) {
 			if (bufDescTable[frame].refbit == true) {
 				// clear refbit
@@ -89,8 +92,6 @@ void BufMgr::allocBuf(FrameId& frame) {
 			// call Set() on the frame
 			bufDescTable[frame].Set(bufDescTable[frame].file, bufDescTable[frame].pageNo);
 		}
-		// advance clock pointer
-		advanceClock();
 	}
 }
 
@@ -143,9 +144,9 @@ void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
 	bufPool[frameNo] = file.allocatePage();
 	hashTable.insert(file, pageNo, frameNo);
   bufDescTable[frameNo].Set(file, pageNo);
-	page = &bufPool[frameNo]
+	page = &bufPool[frameNo];
 
-  // Allocate empty page in specified file using file.allocatePage()
+	// Allocate empty page in specified file using file.allocatePage()
   // Call allocBuf() to obtain buffer pool frame
   // Intert entry into hashtable and use Set()
   // Return page number of allocated page and pointer to buffer frame allocated for the page
