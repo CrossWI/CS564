@@ -6,6 +6,15 @@
  * of Wisconsin-Madison.
  */
 
+/**
+ * |----------------------------|
+ * | Name					 | Student ID |
+ * |---------------|------------|
+ * | Cameron Cross | 9081611148 |
+ * | Richard Wang	 | ???        |
+ * |----------------------------|
+ */ 
+
 #include "buffer.h"
 
 #include <iostream>
@@ -37,10 +46,21 @@ BufMgr::BufMgr(std::uint32_t bufs)
   clockHand = bufs - 1;
 }
 
+/**
+ * Advance clock to next frame in the buffer pool.
+ */
 void BufMgr::advanceClock() {
   clockHand = (clockHand + 1) % numBufs;
 }
 
+/**
+ * Allocates a free frame using the clock algorithm; if necessary, writing a dirty page back
+ * to disk.
+ * 
+ * @param frame frame ID of frame to be allocated
+ * 
+ * @throws BufferExceededException if all buffer frames are pinned
+ */
 void BufMgr::allocBuf(FrameId& frame) {
 	// count for clockHand
 	uint32_t count = 0;
@@ -84,6 +104,18 @@ void BufMgr::allocBuf(FrameId& frame) {
 	}
 }
 
+/**
+ * Reads a given page from the file into a frame.
+ * Two options:
+ * (a) Page is not in the buffer pool
+ *    - allocate a new frame of the buffer pool for reading the page
+ * (b) Page is in the buffer pool
+ * 	  - set the appropriate refbit and pin count
+ * 
+ * @param file   File to use
+ * @param PageNo Page number to be read from file
+ * @param page   Used to get requested page object to read
+ */ 
 void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
   FrameId frameNo = -1;
 
@@ -106,6 +138,15 @@ void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
   page = &bufPool[frameNo];
 }
 
+/**
+ * Unpin a page from the buffer pool
+ * 
+ * @param file   File to use
+ * @param pageNo Page number of page being unpinned
+ * @param dirty  used to set dirty but of buffer pool frame
+ * 
+ * @throws PageNotPinnedException if the pin count is 0
+ */ 
 void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
 	try {
 		FrameId frameNo;
@@ -126,6 +167,13 @@ void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
   	catch (const HashNotFoundException&) {}
 }
 
+/**
+ * Allocates a new page in the file
+ * 
+ * @param file    File to allocate page in
+ * @param pageNo  Page number of page being allocated
+ * @param page    Page to allocate space for
+ */ 
 void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
 	FrameId frameNo = -1;
 	// allocate space in buffer pool
@@ -142,6 +190,34 @@ void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
 	bufDescTable[frameNo].Set(file, pageNo);
 }
 
+/**
+ * Deletes a particular page from a file.
+ * 
+ * @param file   File to delete page from
+ * @param PageNo Number of page to dispose of
+ */ 
+void BufMgr::disposePage(File& file, const PageId PageNo) {
+	try {
+		FrameId frameNo = -1;
+		// see if page exists in buffer pool
+		hashTable.lookup(file, PageNo, frameNo);
+	  // remove the page from buffer pool
+  	hashTable.remove(file, PageNo);
+		// clear bits
+		bufDescTable[frameNo].clear();
+		// delete page
+		file.deletePage(PageNo);
+	} catch (const HashNotFoundException&) {}
+}
+
+/**
+ * Writes all dirty pages in buffer pool frame to disk
+ * 
+ * @param file File to flush dirty pages from
+ * 
+ * @throws PagePinnedException if some page of the file is pinned
+ * @throws BadBufferException if an invalid page belonging to the file is encountered
+ */ 
 void BufMgr::flushFile(File& file) {
 	// scan bufTable for pages belonging to file
 	for (FrameId i = 0; i < numBufs; i++) {
@@ -171,20 +247,9 @@ void BufMgr::flushFile(File& file) {
 	}
 }
 
-void BufMgr::disposePage(File& file, const PageId PageNo) {
-	try {
-		FrameId frameNo = -1;
-		// see if page exists in buffer pool
-		hashTable.lookup(file, PageNo, frameNo);
-	  // remove the page from buffer pool
-  	hashTable.remove(file, PageNo);
-		// clear bits
-		bufDescTable[frameNo].clear();
-		// delete page
-		file.deletePage(PageNo);
-	} catch (const HashNotFoundException&) {}
-}
-
+/**
+ * Prints the contents of the buffer pool
+ */ 
 void BufMgr::printSelf(void) {
   int validFrames = 0;
 
