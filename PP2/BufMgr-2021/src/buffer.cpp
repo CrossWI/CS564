@@ -37,17 +37,6 @@ BufMgr::BufMgr(std::uint32_t bufs)
   clockHand = bufs - 1;
 }
 
-// BufMgr::~BufMgr() {
-//     for (FrameId i = 0; i < numBufs; i++) {
-// 		if (bufDescTable[i].valid && bufDescTable[i].dirty) {
-// 			bufDescTable[i].file.writePage(bufPool[i]);
-// 		}
-// 	}
-// 	delete[] &bufPool;
-// 	delete[] &bufDescTable;
-// 	delete &hashTable;
-// }
-
 void BufMgr::advanceClock() {
   clockHand = (clockHand + 1) % numBufs;
 }
